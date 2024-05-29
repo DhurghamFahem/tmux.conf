@@ -1,0 +1,27 @@
+#!/bin/bash
+
+SESSION_NAME=$(echo "$1" | tr -d '.')
+
+if [ -n "$TMUX" ]; then
+  exit 0
+fi
+
+if [ -z "$1" ]; then 
+  echo "session name required"
+  exit 0
+fi
+
+cd $(find . -iname $1 -type d 2>/dev/null)
+
+CMD="nvim ."
+tmux new-session -d -s "$SESSION_NAME"
+
+# tmux rename-window -t $1 'main'
+tmux send-keys -t $SESSION_NAME "$CMD" C-m
+
+tmux split-window -h -t "$SESSION_NAME:1"
+tmux resize-pane -t "$SESSION_NAME:1.2" -x 2
+
+tmux split-window -v -t "$SESSION_NAME:1.2"
+tmux select-pane -t "$SESSION_NAME:1.1" 
+tmux attach-session -t $SESSION_NAME
